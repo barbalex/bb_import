@@ -15,11 +15,13 @@ const pgClient = new Client({
 })
 await pgClient.connect()
 
-// 1. import event
+// 1. fetch all docs with valid date
 const result = await bb.list({ type: 'events', include_docs: true })
 const rows = result.rows
   .map((r) => r.doc)
   .filter((e) => !e._id.includes('Invalid date'))
+
+// 1. import event
 const events = rows.filter((r) => r.type === 'events')
 //console.log('events:', events)
 const eventsPrepared = events.map((e) => {
@@ -33,12 +35,7 @@ const eventsPrepared = events.map((e) => {
     tags: e.tags,
   }
 })
-//console.log('rawEvents:', rawEvents)
-// console.log('eventsPrepared:', eventsPrepared)
-// console.log(
-//   'event datums:',
-//   eventsPrepared.map((e) => e.datum),
-// )
+
 eventsPrepared.forEach((e) => {
   pgClient.query(
     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
