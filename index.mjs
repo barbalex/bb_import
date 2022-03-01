@@ -25,6 +25,7 @@ const rows = result.rows
 const events = rows
   .filter((r) => r.type === 'events')
   .map((e) => {
+    // events_
     const dat = e._id.substr(7, 17)
 
     return {
@@ -51,6 +52,26 @@ events.forEach((e) => {
 })
 
 // 2. import article
+const articles = rows
+  .filter((r) => r.type === 'articles')
+  .map((e) => {
+    // commentaries_
+    const dat = e._id.substr(13, 23)
+
+    return {
+      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
+      title: e.title,
+      content: e.article,
+    }
+  })
+//console.log('articles:', articles)
+
+articles.forEach((e) => {
+  pgClient.query(
+    `insert into article(datum, title, content) values($1, $2, $3)`,
+    [e.datum, e.title, e.content],
+  )
+})
 
 // 3. import monthly_event
 
