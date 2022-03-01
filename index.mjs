@@ -17,7 +17,9 @@ await pgClient.connect()
 
 // 1. import event
 const result = await bb.list({ type: 'events', include_docs: true })
-const rows = result.rows.map((r) => r.doc)
+const rows = result.rows
+  .map((r) => r.doc)
+  .filter((e) => !e._id.includes('Invalid date'))
 const events = rows.filter((r) => r.type === 'events')
 //console.log('events:', events)
 const eventsPrepared = events.map((e) => {
@@ -26,7 +28,7 @@ const eventsPrepared = events.map((e) => {
   return {
     datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
     title: e.title,
-    links: e.links,
+    links: e.links.filter((l) => !!l.url),
     event_type: e.eventType,
     tags: e.tags,
   }
@@ -43,9 +45,9 @@ eventsPrepared.forEach((e) => {
     [
       e.datum,
       e.title,
-      JSON.stringify(e.links),
+      e.links?.length ? JSON.stringify(e.links) : null,
       e.event_type,
-      JSON.stringify(e.tags),
+      e.tags?.length ? JSON.stringify(e.tags) : null,
     ],
   )
 })
