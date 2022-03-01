@@ -32,17 +32,23 @@ const eventsPrepared = events.map((e) => {
   }
 })
 //console.log('rawEvents:', rawEvents)
-console.log('eventsPrepared:', eventsPrepared)
+// console.log('eventsPrepared:', eventsPrepared)
 // console.log(
 //   'event datums:',
 //   eventsPrepared.map((e) => e.datum),
 // )
-// eventsPrepared.forEach((e) => {
-//   pgClient.query(
-//     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
-//     [e.datum, e.title, e.links, e.event_type, e.tags],
-//   )
-// })
+eventsPrepared.forEach((e) => {
+  pgClient.query(
+    `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
+    [
+      e.datum,
+      e.title,
+      JSON.stringify(e.links),
+      e.event_type,
+      JSON.stringify(e.tags),
+    ],
+  )
+})
 
 // 2. import article
 
