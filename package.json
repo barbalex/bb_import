@@ -1,0 +1,9 @@
+{
+  "name": "bb_import",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "nano": "9.0.5"
+  }
+}
