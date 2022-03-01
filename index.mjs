@@ -21,78 +21,78 @@ const rows = result.rows
   .map((r) => r.doc)
   .filter((e) => !e._id.includes('Invalid date'))
 
-// // 1. import event
-// const events = rows
-//   .filter((r) => r.type === 'events')
-//   .map((e) => {
-//     // events_
-//     const dat = e._id.substr(7, 17)
+// 1. import event
+const events = rows
+  .filter((r) => r.type === 'events')
+  .map((e) => {
+    // events_
+    const dat = e._id.substr(7, 17)
 
-//     return {
-//       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
-//       title: e.title,
-//       links: e.links.filter((l) => !!l.url),
-//       event_type: e.eventType,
-//       tags: e.tags,
-//     }
-//   })
-// //console.log('events:', events)
+    return {
+      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
+      title: e.title,
+      links: e.links.filter((l) => !!l.url),
+      event_type: e.eventType,
+      tags: e.tags,
+    }
+  })
+//console.log('events:', events)
 
-// events.forEach((e) => {
-//   pgClient.query(
-//     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
-//     [
-//       e.datum,
-//       e.title,
-//       e.links?.length ? JSON.stringify(e.links) : null,
-//       e.event_type,
-//       e.tags?.length ? JSON.stringify(e.tags) : null,
-//     ],
-//   )
-// })
+for (const e of events) {
+  await pgClient.query(
+    `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
+    [
+      e.datum,
+      e.title,
+      e.links?.length ? JSON.stringify(e.links) : null,
+      e.event_type,
+      e.tags?.length ? JSON.stringify(e.tags) : null,
+    ],
+  )
+}
 
-// // 2. import article
-// const articles = rows
-//   .filter((r) => r.type === 'articles')
-//   .map((e) => {
-//     // commentaries_
-//     const dat = e._id.substr(13, 23)
+// 2. import article
+const articles = rows
+  .filter((r) => r.type === 'articles')
+  .map((e) => {
+    // commentaries_
+    const dat = e._id.substr(13, 23)
 
-//     return {
-//       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
-//       title: e.title,
-//       content: e.article,
-//     }
-//   })
-// //console.log('articles:', articles)
+    return {
+      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
+      title: e.title,
+      content: e.article,
+    }
+  })
+//console.log('articles:', articles)
 
-// articles.forEach((e) => {
-//   pgClient.query(
-//     `insert into article(datum, title, content) values($1, $2, $3)`,
-//     [e.datum, e.title, e.content],
-//   )
-// })
+for (const e of articles) {
+  await pgClient.query(
+    `insert into article(datum, title, content) values($1, $2, $3)`,
+    [e.datum, e.title, e.content],
+  )
+}
 
-// // 3. import monthly_event
-// const monthlyEvents = rows
-//   .filter((r) => r.type === 'monthlyEvents')
-//   .map((e) => {
-//     // monthlyEvents_
-//     const dat = e._id.substr(14, 24)
+// 3. import monthly_event
+const monthlyEvents = rows
+  .filter((r) => r.type === 'monthlyEvents')
+  .map((e) => {
+    // monthlyEvents_
+    const dat = e._id.substr(14, 24)
 
-//     return {
-//       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-28`,
-//       content: e.article,
-//     }
-//   })
-// //console.log('monthlyEvents:', monthlyEvents)
+    return {
+      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-28`,
+      content: e.article,
+    }
+  })
+//console.log('monthlyEvents:', monthlyEvents)
 
-// monthlyEvents.forEach((e) => {
-//   pgClient.query(`insert into monthly_event(datum, content) values($1, $2)`, [
-//     e.datum,
-//     e.content,
-//   ])
-// })
+for (const e of monthlyEvents) {
+  await pgClient.query(
+    `insert into monthly_event(datum, content) values($1, $2)`,
+    [e.datum, e.content],
+  )
+}
 
 // 4. import page
 const pages = rows
@@ -104,11 +104,30 @@ const pages = rows
     }
   })
 
-pages.forEach((e) => {
-  pgClient.query(`insert into page (name, content) values($1, $2)`, [
+for (const e of pages) {
+  await pgClient.query(`insert into page (name, content) values($1, $2)`, [
     e.name,
     e.content,
   ])
-})
+}
 
 // 4. import publication
+const publications = rows
+  .filter((r) => r.type === 'publications')
+  .map((e) => {
+    return {
+      title: e.title,
+      category: e.category,
+      sort: e.order,
+    }
+  })
+//console.log('publications:', publications)
+
+for (const e of publications) {
+  await pgClient.query(
+    `insert into publication(title, category, sort) values($1, $2, $3)`,
+    [e.title, e.category, e.sort],
+  )
+}
+
+process.exit()
