@@ -22,21 +22,22 @@ const rows = result.rows
   .filter((e) => !e._id.includes('Invalid date'))
 
 // 1. import event
-const events = rows.filter((r) => r.type === 'events')
+const events = rows
+  .filter((r) => r.type === 'events')
+  .map((e) => {
+    const dat = e._id.substr(7, 17)
+
+    return {
+      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
+      title: e.title,
+      links: e.links.filter((l) => !!l.url),
+      event_type: e.eventType,
+      tags: e.tags,
+    }
+  })
 //console.log('events:', events)
-const eventsPrepared = events.map((e) => {
-  const dat = e._id.substr(7, 17)
 
-  return {
-    datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
-    title: e.title,
-    links: e.links.filter((l) => !!l.url),
-    event_type: e.eventType,
-    tags: e.tags,
-  }
-})
-
-eventsPrepared.forEach((e) => {
+events.forEach((e) => {
   pgClient.query(
     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
     [
