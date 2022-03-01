@@ -16,20 +16,33 @@ const pgClient = new Client({
 await pgClient.connect()
 
 // 1. import event
-const rawEvents = await bb.list({ type: 'events', include_docs: true })
-const events = rawEvents.rows.map((e) => {
-  const dat = e.id.substr(7, 17)
+const result = await bb.list({ type: 'events', include_docs: true })
+const rows = result.rows.map((r) => r.doc)
+const events = rows.filter((r) => r.type === 'events')
+//console.log('events:', events)
+const eventsPrepared = events.map((e) => {
+  const dat = e._id.substr(7, 17)
+
   return {
-    id: e.id,
     datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
-    title: e.doc.title,
-    links: e.doc.links,
-    event_type: e.doc.eventType,
-    tags: e.doc.tags,
+    title: e.title,
+    links: e.links,
+    event_type: e.eventType,
+    tags: e.tags,
   }
 })
 //console.log('rawEvents:', rawEvents)
-console.log('events:', events)
+console.log('eventsPrepared:', eventsPrepared)
+// console.log(
+//   'event datums:',
+//   eventsPrepared.map((e) => e.datum),
+// )
+// eventsPrepared.forEach((e) => {
+//   pgClient.query(
+//     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
+//     [e.datum, e.title, e.links, e.event_type, e.tags],
+//   )
+// })
 
 // 2. import article
 
