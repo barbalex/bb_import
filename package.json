@@ -1,10 +1,11 @@
 {
   "name": "bb_import",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "index.mjs",
   "license": "MIT",
   "dependencies": {
+    "js-base64": "3.7.2",
     "nano": "9.0.5",
-    "pg": "^8.7.3"
+    "pg": "8.7.3"
   }
 }

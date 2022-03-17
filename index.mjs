@@ -1,4 +1,5 @@
 import { createRequire } from 'module'
+import { Base64 } from 'js-base64'
 
 import nano from 'nano'
 const require = createRequire(import.meta.url) // construct the require method
@@ -36,7 +37,7 @@ const events = rows
       tags: e.tags,
     }
   })
-//console.log('events:', events)
+console.log('events:', events)
 
 for (const e of events) {
   await pgClient.query(
@@ -61,7 +62,7 @@ const articles = rows
     return {
       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
       title: e.title,
-      content: e.article,
+      content: e.article ? Base64.decode(e.article) : null,
     }
   })
 //console.log('articles:', articles)
@@ -82,7 +83,7 @@ const monthlyEvents = rows
 
     return {
       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-28`,
-      content: e.article,
+      content: e.article ? Base64.decode(e.article) : null,
     }
   })
 //console.log('monthlyEvents:', monthlyEvents)
@@ -96,12 +97,18 @@ for (const e of monthlyEvents) {
 
 // 4. import page
 const pages = rows
+  // TODO: import only needed pages > check if more than aboutUs is needed
   .filter((r) => r.type === 'pages')
   .map((e) => {
-    return {
+    const p = {
       name: e._id.replace('pages_', ''),
-      content: e.article,
+      content: e.article ? Base64.decode(e.article) : null,
     }
+    // ensure id of aboutUs is fixed as used elsewhere
+    if (p.name === 'aboutUs') {
+      p.id === '24c9db53-6d7d-4a97-98b4-666c9aaa85c9'
+    }
+    return p
   })
 
 for (const e of pages) {
