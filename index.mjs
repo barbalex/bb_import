@@ -37,7 +37,7 @@ const events = rows
       tags: e.tags,
     }
   })
-console.log('events:', events)
+//console.log('events:', events)
 
 for (const e of events) {
   await pgClient.query(
@@ -63,14 +63,15 @@ const articles = rows
       datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-${dat.substr(8, 2)}`,
       title: e.title,
       content: e.article ? Base64.decode(e.article) : null,
+      draft: e.draft === undefined ? false : e.draft,
     }
   })
 //console.log('articles:', articles)
 
 for (const e of articles) {
   await pgClient.query(
-    `insert into article(datum, title, content) values($1, $2, $3)`,
-    [e.datum, e.title, e.content],
+    `insert into article(datum, title, content, draft) values($1, $2, $3, $4)`,
+    [e.datum, e.title, e.content, e.draft],
   )
 }
 
@@ -99,17 +100,11 @@ for (const e of monthlyEvents) {
 const pages = rows
   // TODO: import only needed pages > check if more than aboutUs is needed
   .filter((r) => r.type === 'pages')
-  .map((e) => {
-    const p = {
-      name: e._id.replace('pages_', ''),
-      content: e.article ? Base64.decode(e.article) : null,
-    }
-    // ensure id of aboutUs is fixed as used elsewhere
-    if (p.name === 'aboutUs') {
-      p.id === '24c9db53-6d7d-4a97-98b4-666c9aaa85c9'
-    }
-    return p
-  })
+  .map((e) => ({
+    id: null,
+    name: e._id.replace('pages_', ''),
+    content: e.article ? Base64.decode(e.article) : null,
+  }))
 
 for (const e of pages) {
   await pgClient.query(`insert into page (name, content) values($1, $2)`, [
@@ -117,6 +112,10 @@ for (const e of pages) {
     e.content,
   ])
 }
+// ensure id of aboutUs is fixed as used elsewhere
+await pgClient.query(
+  `update page set id = '24c9db53-6d7d-4a97-98b4-666c9aaa85c9' where name = 'aboutUs'`,
+)
 
 // 4. import publication
 const publications = rows
@@ -126,14 +125,16 @@ const publications = rows
       title: e.title,
       category: e.category,
       sort: e.order,
+      draft: e.draft === undefined ? false : e.draft,
+      content: e.article ? Base64.decode(e.article) : null,
     }
   })
 //console.log('publications:', publications)
 
 for (const e of publications) {
   await pgClient.query(
-    `insert into publication(title, category, sort) values($1, $2, $3)`,
-    [e.title, e.category, e.sort],
+    `insert into publication(title, category, sort, draft, content) values($1, $2, $3, $4, $5, $6)`,
+    [e.title, e.category, e.sort, e.draft, e.content],
   )
 }
 
