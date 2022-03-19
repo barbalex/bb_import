@@ -133,7 +133,7 @@ const publications = rows
 
 for (const e of publications) {
   await pgClient.query(
-    `insert into publication(title, category, sort, draft, content) values($1, $2, $3, $4, $5, $6)`,
+    `insert into publication(title, category, sort, draft, content) values($1, $2, $3, $4, $5)`,
     [e.title, e.category, e.sort, e.draft, e.content],
   )
 }
