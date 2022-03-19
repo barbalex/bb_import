@@ -105,6 +105,7 @@ const pages = rows
     name: e._id.replace('pages_', ''),
     content: e.article ? Base64.decode(e.article) : null,
   }))
+  .filter((p) => p.name === 'aboutUs')
 
 for (const e of pages) {
   await pgClient.query(`insert into page (name, content) values($1, $2)`, [
