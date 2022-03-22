@@ -37,8 +37,8 @@ const events = rows
       tags: e.tags,
     }
   })
-//console.log('events:', events)
 
+await pgClient.query('truncate event')
 for (const e of events) {
   await pgClient.query(
     `insert into event(datum, title, links, event_type, tags) values($1, $2, $3, $4, $5)`,
@@ -66,8 +66,8 @@ const articles = rows
       draft: e.draft === undefined ? false : e.draft,
     }
   })
-//console.log('articles:', articles)
 
+await pgClient.query('truncate article')
 for (const e of articles) {
   await pgClient.query(
     `insert into article(datum, title, content, draft) values($1, $2, $3, $4)`,
@@ -75,28 +75,7 @@ for (const e of articles) {
   )
 }
 
-// 3. import monthly_event
-const monthlyEvents = rows
-  .filter((r) => r.type === 'monthlyEvents')
-  .map((e) => {
-    // monthlyEvents_
-    const dat = e._id.substr(14, 24)
-
-    return {
-      datum: `${dat.substr(0, 4)}-${dat.substr(5, 2)}-28`,
-      content: e.article ? Base64.decode(e.article) : null,
-    }
-  })
-//console.log('monthlyEvents:', monthlyEvents)
-
-for (const e of monthlyEvents) {
-  await pgClient.query(
-    `insert into monthly_event(datum, content) values($1, $2)`,
-    [e.datum, e.content],
-  )
-}
-
-// 4. import page
+// 3. import page
 const pages = rows
   // TODO: import only needed pages > check if more than aboutUs is needed
   .filter((r) => r.type === 'pages')
@@ -107,6 +86,7 @@ const pages = rows
   }))
   .filter((p) => p.name === 'aboutUs')
 
+await pgClient.query('truncate page')
 for (const e of pages) {
   await pgClient.query(`insert into page (name, content) values($1, $2)`, [
     e.name,
@@ -130,8 +110,8 @@ const publications = rows
       content: e.article ? Base64.decode(e.article) : null,
     }
   })
-//console.log('publications:', publications)
 
+await pgClient.query('truncate publication')
 for (const e of publications) {
   await pgClient.query(
     `insert into publication(title, category, sort, draft, content) values($1, $2, $3, $4, $5)`,
