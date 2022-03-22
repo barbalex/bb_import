@@ -51,6 +51,16 @@ for (const e of events) {
     ],
   )
 }
+// set tags_sort
+await pgClient.query(`UPDATE event SET tags_sort = 1 WHERE tags ? 'statistics'`)
+await pgClient.query(
+  `UPDATE event SET tags_sort = 2 WHERE tags ? 'monthlyStatistics'`,
+)
+await pgClient.query(`UPDATE event SET tags_sort = 3 WHERE tags ? 'victims'`)
+await pgClient.query(
+  `UPDATE event SET tags_sort = 4 WHERE tags ? 'highlighted'`,
+)
+await pgClient.query(`UPDATE event SET tags_sort = 5 WHERE tags ? 'weather'`)
 
 // 2. import article
 const articles = rows
